@@ -1,59 +1,79 @@
-import { useEffect, FormEventHandler } from 'react';
-import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Head, useForm } from '@inertiajs/react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import InputError from "@/Components/InputError";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Head, Link, useForm } from "@inertiajs/react";
+import { PageProps } from "@/types";
+import { useEffect, FormEventHandler } from "react";
 
-export default function ConfirmPassword() {
+export default function ConfirmPassword({ auth }: PageProps<{}>) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        password: '',
+        password: "",
     });
 
     useEffect(() => {
         return () => {
-            reset('password');
+            reset("password");
         };
     }, []);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('password.confirm'));
+        post(route("password.confirm"));
     };
 
     return (
-        <GuestLayout>
-            <Head title="Confirm Password" />
+        <>
+            <AuthenticatedLayout user={auth.user}>
+                <Head title="Email Verification" />
 
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                This is a secure area of the application. Please confirm your password before continuing.
-            </div>
+                <Container>
+                    <Row>
+                        <Col className="mt-5" md={{ span: 4, offset: 4 }}>
+                            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                                Thanks for signing up! Before getting started,
+                                could you verify your email address by clicking
+                                on the link we just emailed to you? If you
+                                didn't receive the email, we will gladly send
+                                you another.
+                            </div>
 
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                            {status === "verification-link-sent" && (
+                                <div className="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+                                    A new verification link has been sent to the
+                                    email address you provided during
+                                    registration.
+                                </div>
+                            )}
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
+                            <Form onSubmit={submit}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Password</Form.Label>
+                                    <Form.Control
+                                        type="password"
+                                        name="password"
+                                        className="mt-1"
+                                        value={data.password}
+                                        onChange={(e) =>
+                                            setData("password", e.target.value)
+                                        }
+                                    />
+                                    <InputError
+                                        message={errors.password}
+                                        className="mt-2"
+                                    />
+                                </Form.Group>
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="flex items-center justify-end mt-4">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+                                <div className="d-flex justify-content-between mt-4">
+                                    <Button disabled={processing}>
+                                        Confirm
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Col>
+                    </Row>
+                </Container>
+            </AuthenticatedLayout>
+        </>
     );
 }
